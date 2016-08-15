@@ -32,7 +32,7 @@ router.get('/new', function(req, res) {
 router.get('/:id', function(req, res) {
   db.post.find({
     where: { id: req.params.id },
-    include: [db.author]
+    include: [db.author, db.comment]
   })
   .then(function(post) {
     if (!post) throw Error();
@@ -40,6 +40,21 @@ router.get('/:id', function(req, res) {
   })
   .catch(function(error) {
     res.status(400).render('main/404');
+  });
+});
+
+router.post("/:id", function(req, res){
+  db.post.findOne({where: {id: req.params.id}}).then(function(article){
+    if(article){
+      article.createComment({
+        name: req.body.name,
+        content: req.body.content
+      }).then(function(comment){
+        res.redirect('/posts/' + req.params.id);
+      });
+    } else {
+      res.send("Oh no! This is Error ! ~ Didn't get added.")
+    }
   });
 });
 
